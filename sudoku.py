@@ -14,20 +14,26 @@ from typing import Iterable, Sequence
 class Sudoku:
     """A mutable sudoku puzzle."""
 
-    def __init__(self, puzzle: Iterable[Iterable]):     
+    def __init__(self, puzzle: Iterable[Iterable]):
         self._grid: dict[int, dict[int, int]] = {}
-        for row in range(9):
+        col_num = 0
+        row_num = 0
+
+        for puzzle_row in puzzle:
             new_row = {}
-            for col in range(9):
-                new_row[col] = int(puzzle[row][col])
-            self._grid[row] = new_row
-        
+            col_num = 0
+            for value in puzzle_row:
+                new_row[col_num] = int(value)
+                col_num += 1
+            self._grid[row_num] = new_row
+            row_num += 1
+
         # a columnwise variant to speed up column_values
         self._grid_colwise: dict[int, dict[int, int]] = {}
         for row in range(9):
             new_row = {}
             for col in range(9):
-                new_row[col] = int(puzzle[col][row])
+                new_row[col] = int(self._grid[col][row])
             self._grid_colwise[row] = new_row
 
     def place(self, value: int, x: int, y: int) -> None:
@@ -47,7 +53,7 @@ class Sudoku:
         """Returns all possible values (options) at x,y."""
         options = {1, 2, 3, 4, 5, 6, 7, 8, 9}
 
-        # Remove all values from the row    
+        # Remove all values from the row
         row_val = set(self.row_values(y))
         options = options - row_val
 
@@ -115,15 +121,13 @@ class Sudoku:
         for i in range(9):
             if values != set(self.column_values(i)) or values != set(self.row_values(i)) or values != set(self.block_values(i)):
                 return False
-
-
         return True
 
     def __str__(self) -> str:
         representation = ""
 
-        for row in self._grid:
-            row = self._grid[row]
+        for key in self._grid:
+            row = self._grid[key]
             row_ints = list(row.values())
             row_strs = [str(i) for i in row_ints]
             representation += "".join(row_strs + ["\n"])
